@@ -41,11 +41,6 @@ public class WekaSegmentaionStage {
 
     }
 
-    public static void main(String[] args) {
-        WekaSegmentaionStage obj = new WekaSegmentaionStage();
-        obj.apply();
-    }
-
     private void prepare() {
         wekaSegmentaion.loadClassifier(this.classifierModelFileAddress);
         File inputImagesFolder = new File(inputImageFolder);
@@ -62,16 +57,9 @@ public class WekaSegmentaionStage {
 
     }
 
-    private void makeInputForm(GenericDialog genericDialog) {
-        genericDialog.addPanel(getChooser("Input Image File Folder", 1));
-        genericDialog.addPanel(getChooser("Output Folder", 2));
-        genericDialog.addPanel(getChooser("Weka segmentation classier model", 2));
-        genericDialog.pack();
-        genericDialog.showDialog();
-        if (genericDialog.wasCanceled()) {
-            IJ.error("PlugIn canceled!");
-        }
-
+    public static void main(String[] args) {
+        WekaSegmentaionStage obj = new WekaSegmentaionStage();
+        obj.apply();
     }
 
     private Panel getChooser(String label, int factor) {
@@ -117,6 +105,18 @@ public class WekaSegmentaionStage {
         }
     }
 
+    private void makeInputForm(GenericDialog genericDialog) {
+        genericDialog.addPanel(getChooser("Input Image Folder", 1));
+        genericDialog.addPanel(getChooser("Output Folder", 2));
+        genericDialog.addPanel(getChooser("Classier model", 3));
+        genericDialog.pack();
+        genericDialog.showDialog();
+        if (genericDialog.wasCanceled()) {
+            IJ.error("PlugIn canceled!");
+        }
+
+    }
+
     private void applyClassifier(File imageFile) {
         ImagePlus imagePlus = new ImagePlus(imageFile.getAbsolutePath());
         if (imagePlus != null) {
@@ -124,7 +124,7 @@ public class WekaSegmentaionStage {
             ImagePlus result = wekaSegmentaion.applyClassifier(imagePlus, 0, true);
 
             //make outputFileName
-            String outputFileName = imageFile.getName().replaceFirst("[.][^.]+$", "") + ".tif";
+            String outputFileName = imageFile.getName() + ".tif";
             new FileSaver(result).saveAsTiff(outpurImageFolder + File.separator + outputFileName);
 
             // force garbage collection (important for large images)
@@ -134,5 +134,13 @@ public class WekaSegmentaionStage {
         } else {
             IJ.error("Not able to read image");
         }
+    }
+
+    public String getOutpurImageFolder() {
+        return outpurImageFolder;
+    }
+
+    public String getInputImageFolder() {
+        return inputImageFolder;
     }
 }
