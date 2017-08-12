@@ -136,6 +136,22 @@ public class WekaSegmentaionStage {
         }
     }
 
+    public static ImagePlus applyClassifier(String imagepath, String wekaClassifier) {
+        return applyClassifier(new ImagePlus(imagepath), wekaClassifier);
+    }
+
+    public static ImagePlus applyClassifier(ImagePlus imagePlus, String wekaClassifier) {
+        WekaSegmentation wekaSegmentation = new WekaSegmentation();
+        wekaSegmentation.loadClassifier(wekaClassifier);
+        if (imagePlus == null) {
+            IJ.error("empty image");
+            return null;
+        }
+        ImagePlus result = wekaSegmentation.applyClassifier(imagePlus, 0, true);
+        System.gc();
+        return result;
+    }
+
     public String getOutpurImageFolder() {
         return outpurImageFolder;
     }

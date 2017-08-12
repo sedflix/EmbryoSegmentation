@@ -39,11 +39,6 @@ public class ThresholdingStage {
         this.upperThreshold = (int) gd.getNextNumber();
     }
 
-    public static void main(String[] args) {
-        ThresholdingStage obj = new ThresholdingStage("/home/sid/Study/GSOC/GSoc/src/data/Data Annotation/YetAnotherProbMap", "/home/sid/Study/GSOC/GSoc/src/data/Data Annotation/YetAnotherThreshold", 0.0, 0.6);
-        obj.apply();
-    }
-
     private void makeInputForm(GenericDialog genericDialog) {
         genericDialog.addPanel(getChooser("Input Folder", 1));
         genericDialog.addPanel(getChooser("Output Folder", 2));
@@ -94,6 +89,32 @@ public class ThresholdingStage {
         }
     }
 
+    public static ImagePlus applyThreshold(ImagePlus imagePlus, double lowerThreshold, double upperThreshold) {
+        IJ.setThreshold(imagePlus, lowerThreshold, upperThreshold, "Black & White");
+        IJ.run(imagePlus, "Convert to Mask", "");
+        return imagePlus;
+    }
+
+    private static ImagePlus morph(ImagePlus imagePlus) {
+        //Morphological Operations
+        // TODO: Improve
+        IJ.run(imagePlus, "Close-", "");
+        IJ.run(imagePlus, "Close-", "");
+        IJ.run(imagePlus, "Fill Holes", "");
+        IJ.run(imagePlus, "Close-", "");
+        IJ.run(imagePlus, "Close-", "");
+        IJ.run(imagePlus, "Dilate", "");
+        IJ.run(imagePlus, "Erode", "");
+        IJ.run(imagePlus, "Erode", "");
+
+        return imagePlus;
+    }
+
+    public static void main(String[] args) {
+        ThresholdingStage obj = new ThresholdingStage("/home/sid/Study/GSOC/GSoc/src/data/Data Annotation/YetAnotherProbMap", "/home/sid/Study/GSOC/GSoc/src/data/Data Annotation/YetAnotherThreshold", 0.0, 0.6);
+        obj.apply();
+    }
+
     public void applyThreshold(File imageFile) {
         ImagePlus imagePlus = new ImagePlus(imageFile.getAbsolutePath());
         IJ.run(imagePlus, "Delete Slice", "");
@@ -101,11 +122,11 @@ public class ThresholdingStage {
 
             IJ.setThreshold(imagePlus, lowerThreshold, upperThreshold, "Black & White");
             IJ.run(imagePlus, "Convert to Mask", "");
-
+            imagePlus = morph(imagePlus);
             //make outputFileName
             String outputFileName = imageFile.getName();
             IJ.log(outputFileName);
-            new FileSaver(imagePlus).saveAsTiff(outputDir + File.separator + outputFileName);
+            new FileSaver(imagePlus).saveAsJpeg(outputDir + File.separator + outputFileName);
 
             // force garbage collection (important for large images)
             imagePlus = null;
