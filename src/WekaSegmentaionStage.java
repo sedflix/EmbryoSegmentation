@@ -103,9 +103,6 @@ public class WekaSegmentaionStage {
                 applyClassifier(inputImage);
             }
         }
-        if (genericDialog.wasCanceled()) {
-            IJ.error("PlugIn canceled!");
-        }
     }
 
     private void makeInputForm(GenericDialog genericDialog) {
@@ -114,6 +111,9 @@ public class WekaSegmentaionStage {
         genericDialog.addPanel(getChooser("Classier model", 3));
         genericDialog.pack();
         genericDialog.showDialog();
+        if (genericDialog.wasCanceled()) {
+            IJ.error("PlugIn canceled!");
+        }
 
     }
 
