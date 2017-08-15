@@ -22,7 +22,7 @@ public class EmbryoBoundryDetection {
     }
 
     public static void main(String[] args) {
-        EmbryoBoundryDetection obj = new EmbryoBoundryDetection("/home/sid/Study/GSOC/GSoc/src/data/Data Annotation/YetAnotherThreshold", "/home/sid/Study/GSOC/GSoc/src/data/Data Annotation/YetAnotherCellMask");
+        EmbryoBoundryDetection obj = new EmbryoBoundryDetection("/home/sid/Study/GSOC/GSoc/src/data/Data Annotation/Orignal", "/home/sid/Study/GSOC/GSoc/src/data/Data Annotation/YetAnotherCellMask");
         obj.apply();
     }
 

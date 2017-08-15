@@ -117,6 +117,7 @@ public class ThresholdingStage {
 
     public void applyThreshold(File imageFile) {
         ImagePlus imagePlus = new ImagePlus(imageFile.getAbsolutePath());
+        //TODO: Handle this Slice Thing
         IJ.run(imagePlus, "Delete Slice", "");
         if (imagePlus != null) {
 

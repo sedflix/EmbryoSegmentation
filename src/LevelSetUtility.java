@@ -17,8 +17,8 @@ public class LevelSetUtility {
         return getWholeCellMask(imagePlus, 1, 1, 3, 3);
     }
 
-    public static ImagePlus getWholeCellMask(ImagePlus imagePlus, int x_offset, int y_offset, int new_width, int new_height) {
-        Roi roi = new Roi(x_offset, y_offset, imagePlus.getWidth() - new_width, imagePlus.getHeight() - new_height);
+    public static ImagePlus getWholeCellMask(ImagePlus imagePlus, int x_offset, int y_offset, int new_width_offset, int new_height_offset) {
+        Roi roi = new Roi(x_offset, y_offset, imagePlus.getWidth() - new_width_offset, imagePlus.getHeight() - new_height_offset);
         return getWholeCellMask(imagePlus, roi);
     }
 
@@ -44,9 +44,12 @@ public class LevelSetUtility {
         return getSegImage(originalImage, roi, convergence, advection, curvature, grey_tol, expandToInside, max_iteration, step_iteration, false);
     }
 
+    public static ImagePlus getSegImage(ImagePlus originalImage, LevelSetParameters levelSetParameters) {
+        return getSegImage(originalImage, levelSetParameters.roi, levelSetParameters.convergence, levelSetParameters.advection, levelSetParameters.curvature, levelSetParameters.grey_tol, levelSetParameters.expandToInside, levelSetParameters.max_iteration, levelSetParameters.step_iteration, levelSetParameters.getProgressReport);
+    }
+
     public static ImagePlus getSegImage(ImagePlus originalImage, Roi roi, double convergence, double advection, double curvature, double grey_tol, boolean expandToInside, int max_iteration, int step_iteration, boolean getProgressReport) {
         originalImage.setRoi(roi);
-
         //creating ImageContainer
         ImageContainer ic = new ImageContainer(originalImage);
 
