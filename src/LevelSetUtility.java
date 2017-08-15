@@ -9,22 +9,12 @@ import levelsets.ij.ImageContainer;
 import levelsets.ij.ImageProgressContainer;
 import levelsets.ij.StateContainer;
 
+/**
+ * LevelSetUtility is a wrapper for LevelSet plugin offered as ImageJ plugin.
+ *
+ * @author Siddharth Yadav
+ */
 public class LevelSetUtility {
-
-
-    public static ImagePlus getWholeCellMask(ImagePlus imagePlus, boolean isDataFine) {
-        //TODO: create a case for isDataFine thing
-        return getWholeCellMask(imagePlus, 1, 1, 3, 3);
-    }
-
-    public static ImagePlus getWholeCellMask(ImagePlus imagePlus, int x_offset, int y_offset, int new_width_offset, int new_height_offset) {
-        Roi roi = new Roi(x_offset, y_offset, imagePlus.getWidth() - new_width_offset, imagePlus.getHeight() - new_height_offset);
-        return getWholeCellMask(imagePlus, roi);
-    }
-
-    public static ImagePlus getWholeCellMask(ImagePlus imagePlus, Roi roi) {
-        return getSegImage(imagePlus, roi, 0.0030, 1.0, 1.0, 1, true, 50, 100);
-    }
 
 
     public static ImagePlus getSegImage(ImagePlus originalImage, double convergence, double grey_tol, int max_iteration, int step_iteration) {
