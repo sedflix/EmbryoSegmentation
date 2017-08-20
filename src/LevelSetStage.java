@@ -111,8 +111,12 @@ public class LevelSetStage {
     }
 
     /**
-     * Code for analysing and detecting overlapping cell(whose overlap ratio is more than x (0.3).
-     * Those overlapping ROIs index is added to toBeRemoved Set
+     * Code for analysing and detecting overlapping(intersecting) cell(whose overlap ratio(or intersection ratio) is more than x (0.3).
+     * Those overlapping ROIs index is added to toBeRemoved Set and then removed.
+     *
+     * This results in following improvements:
+     *  - Effect of over segmentation is rectified here
+     *  - small noise in initial stages are rectifies. small noise evolves into big blocks.
      *
      * @param rm it is used only for getting image dimensions
      * @return ROI manager with minimum overlapping Rois

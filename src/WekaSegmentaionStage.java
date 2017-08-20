@@ -12,6 +12,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 
+/**
+ * WekaSegmentaionStage is kind of the most crucial in this PlugIn.
+ * <p>
+ * The model you are using must satisfy the following properties:
+ * 1) Should be a binary classifier
+ * 2) It should properly identify a major interior region of each cell
+ * 3) Train the model to minimize under-segmentation.
+ * 4) Over segmentation can be rectified in the further stages of the algorithm
+ */
 public class WekaSegmentaionStage {
 
     private final static String title = "Detecting interiors of cell using Weka Segmentation";
@@ -105,18 +114,6 @@ public class WekaSegmentaionStage {
         }
     }
 
-    private void makeInputForm(GenericDialog genericDialog) {
-        genericDialog.addPanel(getChooser("Input Image Folder", 1));
-        genericDialog.addPanel(getChooser("Output Folder", 2));
-        genericDialog.addPanel(getChooser("Classier model", 3));
-        genericDialog.pack();
-        genericDialog.showDialog();
-        if (genericDialog.wasCanceled()) {
-            IJ.error("PlugIn canceled!");
-        }
-
-    }
-
     private void applyClassifier(File imageFile) {
         ImagePlus imagePlus = new ImagePlus(imageFile.getAbsolutePath());
         if (imagePlus != null) {
@@ -124,8 +121,8 @@ public class WekaSegmentaionStage {
             ImagePlus result = wekaSegmentaion.applyClassifier(imagePlus, 0, true);
 
             //make outputFileName
-            String outputFileName = imageFile.getName() + ".tif";
-            new FileSaver(result).saveAsTiff(outpurImageFolder + File.separator + outputFileName);
+            String outputFileName = imageFile.getName();
+            new FileSaver(result).saveAsJpeg(outpurImageFolder + File.separator + outputFileName);
 
             // force garbage collection (important for large images)
             result = null;
@@ -158,5 +155,17 @@ public class WekaSegmentaionStage {
 
     public String getInputImageFolder() {
         return inputImageFolder;
+    }
+
+    private void makeInputForm(GenericDialog genericDialog) {
+        genericDialog.addPanel(getChooser("Input Image Folder", 1));
+        genericDialog.addPanel(getChooser("Output Folder", 2));
+        genericDialog.addPanel(getChooser("Classier model", 3));
+        genericDialog.pack();
+        genericDialog.showDialog();
+        if (genericDialog.wasCanceled()) {
+            IJ.error("PlugIn canceled!");
+        }
+
     }
 }

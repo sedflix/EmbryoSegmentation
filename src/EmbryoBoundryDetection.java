@@ -1,17 +1,29 @@
 import ij.IJ;
 import ij.ImagePlus;
+import ij.gui.GenericDialog;
 import ij.gui.Roi;
+import ij.io.DirectoryChooser;
 import ij.io.FileSaver;
 
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 
 public class EmbryoBoundryDetection {
     private String inputDir;
     private String outputDir;
+    private static final String title = "Boundry Detection";
 
     public EmbryoBoundryDetection(String inputDir, String outputDir) {
         this.inputDir = inputDir;
         this.outputDir = outputDir;
+    }
+
+    public EmbryoBoundryDetection() {
+        GenericDialog gd = new GenericDialog(title);
+        makeInputForm(gd);
     }
 
     public static ImagePlus apply(ImagePlus imagePlus) {
@@ -50,7 +62,50 @@ public class EmbryoBoundryDetection {
 
 
     public static void main(String[] args) {
-        EmbryoBoundryDetection obj = new EmbryoBoundryDetection("/home/sid/Study/GSOC/GSoc/src/data/Data Annotation/Orignal", "/home/sid/Study/GSOC/GSoc/src/data/Data Annotation/YetAnotherCellMask");
-        obj.apply();
+//        EmbryoBoundryDetection obj = new EmbryoBoundryDetection("/home/sid/Study/GSOC/GSoc/src/data/Data Annotation/Orignal", "/home/sid/Study/GSOC/GSoc/src/data/Data Annotation/YetAnotherCellMask");
+        EmbryoBoundryDetection embryoBoundryDetection = new EmbryoBoundryDetection();
+        embryoBoundryDetection.apply();
+    }
+
+    private Panel getChooser(String label, int factor) {
+
+        Panel panel = new Panel(new FlowLayout());
+        JButton jButton = new JButton(label);
+        JTextField jTextField = new JTextField();
+        jTextField.setEditable(false);
+
+        jButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                switch (factor) {
+                    case 1:
+                        DirectoryChooser directoryChooser = new DirectoryChooser(label);
+                        jTextField.setText(directoryChooser.getDirectory());
+                        inputDir = directoryChooser.getDirectory();
+                        break;
+                    case 2:
+                        DirectoryChooser directoryChooser2 = new DirectoryChooser(label);
+                        jTextField.setText(directoryChooser2.getDirectory());
+                        outputDir = directoryChooser2.getDirectory();
+                        break;
+                }
+
+            }
+        });
+        panel.add(jButton);
+        panel.add(jTextField);
+        return panel;
+    }
+
+    private void makeInputForm(GenericDialog genericDialog) {
+        genericDialog.addPanel(getChooser("Input Image Folder", 1));
+        genericDialog.addPanel(getChooser("Output Folder", 2));
+        genericDialog.pack();
+        genericDialog.showDialog();
+        if (genericDialog.wasCanceled()) {
+            IJ.error("PlugIn canceled!");
+        }
+
     }
 }
