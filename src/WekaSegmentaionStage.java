@@ -166,6 +166,5 @@ public class WekaSegmentaionStage {
         if (genericDialog.wasCanceled()) {
             IJ.error("PlugIn canceled!");
         }
-
     }
 }

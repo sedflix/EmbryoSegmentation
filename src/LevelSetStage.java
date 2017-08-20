@@ -2,7 +2,6 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.NewImage;
 import ij.gui.Roi;
-import ij.io.FileSaver;
 import ij.measure.Measurements;
 import ij.measure.ResultsTable;
 import ij.plugin.ImageCalculator;
@@ -11,6 +10,7 @@ import ij.plugin.frame.RoiManager;
 import ij.process.ImageStatistics;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -30,6 +30,14 @@ public class LevelSetStage {
     private String thresholdImageDir;
     private String cellMaskDir;
     private String outputImageDir;
+
+
+    public LevelSetStage(String orginalImageDir, String thresholdImageDir, String cellMaskDir, String outputImageDir) {
+        this.orginalImageDir = orginalImageDir;
+        this.thresholdImageDir = thresholdImageDir;
+        this.cellMaskDir = cellMaskDir;
+        this.outputImageDir = outputImageDir;
+    }
 
     /**
      * @param originalImage
@@ -182,21 +190,44 @@ public class LevelSetStage {
         return rm;
     }
 
+
+    public static ImagePlus apply(ImagePlus originalImage, ImagePlus thresholdImage, ImagePlus cellMask) {
+        IJ.run(thresholdImage, "Make Binary", "");
+        IJ.run(cellMask, "Make Binary", "");
+        return roisToImage(removeOverlappingRois(originalImage, getEvolvedROIs(originalImage, thresholdImage, cellMask)), originalImage.getWidth(), originalImage.getHeight());
+    }
+
     public static void main(String[] args) {
 
-        ImagePlus add1 = IJ.openImage("/home/sid/Study/GSOC/GSoc/src/data/Data Annotation/Orignal/c369.jpg");
-        ImagePlus add2 = IJ.openImage("/home/sid/Study/GSOC/GSoc/src/data/Data Annotation/YetAnotherThreshold/c369.tif");
-        ImagePlus add3 = IJ.openImage("/home/sid/Study/GSOC/GSoc/src/data/Data Annotation/YetAnotherCellMask/c369.jpg");
-        IJ.run(add2, "Make Binary", "");
-        IJ.run(add3, "Make Binary", "");
-        add1.show();
-        add2.show();
-        add3.show();
+//        ImagePlus add1 = IJ.openImage("/home/sid/Study/GSOC/GSoc/src/data/Data Annotation/Orignal/c369.jpg");
+//        ImagePlus add2 = IJ.openImage("/home/sid/Study/GSOC/GSoc/src/data/Data Annotation/YetAnotherThreshold/c369.tif");
+//        ImagePlus add3 = IJ.openImage("/home/sid/Study/GSOC/GSoc/src/data/Data Annotation/YetAnotherCellMask/c369.jpg");
+
+        LevelSetStage levelSetStage = new LevelSetStage(
+                "/home/sid/Study/GSOC/GSoc/src/data/Data Annotation/Orignal/",
+                "/home/sid/Study/GSOC/GSoc/src/data/Data Annotation/YetAnotherThreshold/",
+                "/home/sid/Study/GSOC/GSoc/src/data/Data Annotation/YetAnotherCellMask/",
+                "");
+
+        levelSetStage.apply();
+
+//        ImagePlus imagePlus = apply(add1,add2,add3);
+//        new FileSaver(imagePlus).saveAsJpeg("/home/sid/Study/GSOC/GSoc/src/data/Data Annotation/" + File.separator + "wow.jpg");
 
 
-        ImagePlus imagePlus = roisToImage(removeOverlappingRois(add1, getEvolvedROIs(add1, add2, add3)), add1.getWidth(), add1.getHeight());
-        new FileSaver(imagePlus).saveAsJpeg("/home/sid/Study/GSOC/GSoc/src/data/Data Annotation/" + File.separator + "wow.jpg");
+    }
 
-
+    public void apply() {
+        String[] originalImageDir = new File(this.orginalImageDir).list();
+        String[] cellMaskDir = new File(this.cellMaskDir).list();
+        String[] thresholdDir = new File(this.thresholdImageDir).list();
+        Arrays.sort(originalImageDir);
+        Arrays.sort(cellMaskDir);
+        Arrays.sort(thresholdDir);
+        for (int i = 0; i < originalImageDir.length; i++) {
+            System.out.println(originalImageDir[i]);
+            System.out.println(cellMaskDir[i]);
+            System.out.println(thresholdDir[i]);
+        }
     }
 }

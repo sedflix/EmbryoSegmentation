@@ -70,7 +70,8 @@ public class ThresholdingStage {
                         jTextField.setText(directoryChooser2.getDirectory());
                         outputDir = directoryChooser2.getDirectory();
                         break;
-
+                    default:
+                        System.out.println("What the hell happened here?");
                 }
 
             }
