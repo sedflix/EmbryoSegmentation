@@ -2,6 +2,7 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.NewImage;
 import ij.gui.Roi;
+import ij.io.FileSaver;
 import ij.measure.Measurements;
 import ij.measure.ResultsTable;
 import ij.plugin.ImageCalculator;
@@ -9,6 +10,7 @@ import ij.plugin.filter.ParticleAnalyzer;
 import ij.plugin.frame.RoiManager;
 import ij.process.ImageStatistics;
 
+import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -19,8 +21,11 @@ public class LevelSetStage {
     private String outputImageDir;
 
 
-    public static RoiManager apply(ImagePlus originalImage, ImagePlus thresholdImage, ImagePlus cellMask) {
+    public static RoiManager getEvolvedROIs(ImagePlus originalImage, ImagePlus thresholdImage, ImagePlus cellMask) {
+
+
         thresholdImage = refineMask(thresholdImage, cellMask);
+
         //Declare ROI Manager for Particle Analyzer
         RoiManager rm = new RoiManager();
         ParticleAnalyzer.setRoiManager(rm);
@@ -46,7 +51,10 @@ public class LevelSetStage {
 
         // deletes the previous ROIs.
         originalImage.setOverlay(null);
+        thresholdImage.setOverlay(null);
+        cellMask.setOverlay(null);
         rm.deselect();
+        rm.reset();
         rm.close();
 
         // Updates ROI manager with properly evolved ROIs
@@ -55,19 +63,17 @@ public class LevelSetStage {
             rm.addRoi(finalRoi[j]);
         }
 
-        // @see removeOverlappingRois()
-        rm = removeOverlappingRois(originalImage, rm);
-
         return rm;
-
-//        ImagePlus finalImage = NewImage.createImage("OutputForBenchmarking", originalImage.getWidth(), originalImage.getHeight(), 1, 8, NewImage.FILL_BLACK);
-//
-//        rm.moveRoisToOverlay(finalImage);
-//        finalImage.flatten();
-//
-//        return finalImage;
     }
 
+    private static ImagePlus roisToImage(RoiManager rm, int width, int height) {
+        ImagePlus finalImage = NewImage.createImage("Image with all ROIs in it", width, height, 1, 8, NewImage.FILL_BLACK);
+
+        rm.moveRoisToOverlay(finalImage);
+        finalImage.flatten();
+
+        return finalImage;
+    }
 
     private static ParticleAnalyzer getParticleAnalyzer() {
         //Parameters for ParticleAnalyzer TODO: Research about them
@@ -92,40 +98,51 @@ public class LevelSetStage {
      * Code for analysing and detecting overlapping cell(whose overlap ratio is more than x (0.3).
      * Those overlapping ROIs index is added to toBeRemoved Set
      *
-     * @param rm
-     * @return
+     * @param rm it is used only for getting image dimensions
+     * @return ROI manager with minimum overlapping Rois
      */
     private static RoiManager removeOverlappingRois(ImagePlus originalImage, RoiManager rm) {
+
         //will stores the ROI that are not valid
         Set<Integer> tobeRemoved = new HashSet<Integer>();
         int number_of_roi = rm.getCount();
 
+        //loop to go through all possible pair of rois
         for (int i = 0; i < number_of_roi; i++) {
             for (int j = 0; j < i; j++) {
 
+                //temp image for passing to upcoming functions
                 ImagePlus roi1ImagePlus = NewImage.createImage("temp image", originalImage.getWidth(), originalImage.getHeight(), 1, 8, NewImage.FILL_WHITE);
+
+                //selects a pair
                 rm.setSelectedIndexes(new int[]{i, j});
+
+                //adds the two roi so that we can find the overlapping region
                 rm.runCommand(roi1ImagePlus, "AND");
+
                 if (roi1ImagePlus.getRoi() != null) {
-                    rm.runCommand(roi1ImagePlus, "ADD");
-                    ImageStatistics overlappingRegion = rm.getRoi(rm.getCount() - 1).getStatistics();
-                    tobeRemoved.add(rm.getCount() - 1);
+                    //if overlapping region exists
+
+                    ImageStatistics overlappingRegion = roi1ImagePlus.getRoi().getStatistics();
                     ImageStatistics region1 = rm.getRoi(i).getStatistics();
                     ImageStatistics region2 = rm.getRoi(j).getStatistics();
+
+                    //finds the ratio between the area of overlapping portion  of that roi and area of that roi
                     double area1 = overlappingRegion.area / region1.area;
                     double area2 = overlappingRegion.area / region2.area;
 
                     IJ.log("area1: " + area1 + ";  area2: " + area2 + " ; name: " + rm.getRoi(rm.getCount() - 1).getName());
 
+                    //Removes ROI which have 30% or more of area as an overlapping area
                     if (area1 > 0.3) {
                         tobeRemoved.add(i);
                     } else if (area2 > 0.3) {
                         tobeRemoved.add(j);
                     }
                 }
-
             }
         }
+
         //Removing old and overlapping ROIS
         Object arr[] = tobeRemoved.toArray();
         int arrInt[] = new int[arr.length];
@@ -141,16 +158,18 @@ public class LevelSetStage {
 
     public static void main(String[] args) {
 
-        ImagePlus add1 = IJ.openImage("/home/sid/Study/GSOC/GSoc/src/data/Data Annotation/Orignal/348.jpg");
-        ImagePlus add2 = IJ.openImage("/home/sid/Study/GSOC/GSoc/src/data/Data Annotation/YetAnotherThreshold/348.tif");
-        ImagePlus add3 = IJ.openImage("/home/sid/Study/GSOC/GSoc/src/data/Data Annotation/YetAnotherCellMask/348.jpg");
+        ImagePlus add1 = IJ.openImage("/home/sid/Study/GSOC/GSoc/src/data/Data Annotation/Orignal/c369.jpg");
+        ImagePlus add2 = IJ.openImage("/home/sid/Study/GSOC/GSoc/src/data/Data Annotation/YetAnotherThreshold/c369.tif");
+        ImagePlus add3 = IJ.openImage("/home/sid/Study/GSOC/GSoc/src/data/Data Annotation/YetAnotherCellMask/c369.jpg");
         IJ.run(add2, "Make Binary", "");
         IJ.run(add3, "Make Binary", "");
         add1.show();
         add2.show();
         add3.show();
-//        ImagePlus imagePlus = apply(add1,add2,add3);
-//        new FileSaver(imagePlus).saveAsJpeg("/home/sid/Study/GSOC/GSoc/src/data/Data Annotation/" + File.separator + "wow.jpg");
+
+
+        ImagePlus imagePlus = roisToImage(removeOverlappingRois(add1, getEvolvedROIs(add1, add2, add3)), add1.getWidth(), add1.getHeight());
+        new FileSaver(imagePlus).saveAsJpeg("/home/sid/Study/GSOC/GSoc/src/data/Data Annotation/" + File.separator + "wow.jpg");
 
 
     }
