@@ -24,11 +24,24 @@ public class ThresholdingStage {
         this.upperThreshold = upperThreshold;
     }
 
+    public ThresholdingStage(String inputDir, String outputDir) {
+        GenericDialog gd = new GenericDialog(title);
+        gd.addNumericField("Select Lower Threshold", 0.0, 3);
+        gd.addNumericField("Select Lower Threshold", 0.5, 3);
+
+
+    }
     public ThresholdingStage(Frame frame) {
         GenericDialog gd = new GenericDialog(title, frame);
         makeInputForm(gd);
         this.lowerThreshold = (int) gd.getNextNumber();
         this.upperThreshold = (int) gd.getNextNumber();
+        gd.pack();
+        gd.showDialog();
+        if (gd.wasCanceled()) {
+            IJ.error("PlugIn canceled!");
+        }
+
     }
 
 
@@ -111,11 +124,6 @@ public class ThresholdingStage {
         return imagePlus;
     }
 
-    public static void main(String[] args) {
-        ThresholdingStage obj = new ThresholdingStage("/home/sid/Study/GSOC/GSoc/src/data/Data Annotation/YetAnotherProbMap", "/home/sid/Study/GSOC/GSoc/src/data/Data Annotation/YetAnotherThreshold", 0.0, 0.6);
-        obj.apply();
-    }
-
     public void applyThreshold(File imageFile) {
         ImagePlus imagePlus = new ImagePlus(imageFile.getAbsolutePath());
         //TODO: Handle this Slice Thing
@@ -136,5 +144,10 @@ public class ThresholdingStage {
         } else {
             IJ.error("Not able to read image");
         }
+    }
+
+    public static void main(String[] args) {
+        ThresholdingStage obj = new ThresholdingStage("/home/sid/Study/GSOC/GSoc/src/data/Data Annotation/YetAnotherProbMap", "/home/sid/Study/GSOC/GSoc/src/data/Data Annotation/YetAnotherThreshold", 0.0, 0.6);
+        obj.apply();
     }
 }

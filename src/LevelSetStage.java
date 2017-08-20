@@ -2,6 +2,7 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.NewImage;
 import ij.gui.Roi;
+import ij.io.FileSaver;
 import ij.measure.Measurements;
 import ij.measure.ResultsTable;
 import ij.plugin.ImageCalculator;
@@ -194,7 +195,10 @@ public class LevelSetStage {
     public static ImagePlus apply(ImagePlus originalImage, ImagePlus thresholdImage, ImagePlus cellMask) {
         IJ.run(thresholdImage, "Make Binary", "");
         IJ.run(cellMask, "Make Binary", "");
-        return roisToImage(removeOverlappingRois(originalImage, getEvolvedROIs(originalImage, thresholdImage, cellMask)), originalImage.getWidth(), originalImage.getHeight());
+        ImagePlus imagePlus = roisToImage(removeOverlappingRois(originalImage, getEvolvedROIs(originalImage, thresholdImage, cellMask)), originalImage.getWidth(), originalImage.getHeight());
+        RoiManager roiManager = RoiManager.getRoiManager();
+        roiManager.close();
+        return imagePlus;
     }
 
     public static void main(String[] args) {
@@ -207,7 +211,7 @@ public class LevelSetStage {
                 "/home/sid/Study/GSOC/GSoc/src/data/Data Annotation/Orignal/",
                 "/home/sid/Study/GSOC/GSoc/src/data/Data Annotation/YetAnotherThreshold/",
                 "/home/sid/Study/GSOC/GSoc/src/data/Data Annotation/YetAnotherCellMask/",
-                "");
+                "/home/sid/Study/GSOC/GSoc/src/data/Data Annotation/YetAnotherFinal/");
 
         levelSetStage.apply();
 
@@ -218,16 +222,23 @@ public class LevelSetStage {
     }
 
     public void apply() {
-        String[] originalImageDir = new File(this.orginalImageDir).list();
-        String[] cellMaskDir = new File(this.cellMaskDir).list();
-        String[] thresholdDir = new File(this.thresholdImageDir).list();
-        Arrays.sort(originalImageDir);
-        Arrays.sort(cellMaskDir);
-        Arrays.sort(thresholdDir);
-        for (int i = 0; i < originalImageDir.length; i++) {
-            System.out.println(originalImageDir[i]);
-            System.out.println(cellMaskDir[i]);
-            System.out.println(thresholdDir[i]);
+        String[] originalImageList = new File(this.orginalImageDir).list();
+        String[] cellMaskList = new File(this.cellMaskDir).list();
+        String[] thresholdList = new File(this.thresholdImageDir).list();
+        Arrays.sort(originalImageList);
+        Arrays.sort(cellMaskList);
+        Arrays.sort(thresholdList);
+        for (int i = 0; i < originalImageList.length; i++) {
+            System.out.println(originalImageList[i]);
+            System.out.println(cellMaskList[i]);
+            System.out.println(thresholdList[i]);
+            ImagePlus orgIm = IJ.openImage(orginalImageDir + originalImageList[i]);
+            ImagePlus cellMask = IJ.openImage(cellMaskDir + cellMaskList[i]);
+            ImagePlus thresholdIm = IJ.openImage(thresholdImageDir + thresholdList[i]);
+            ImagePlus finalResult = LevelSetStage.apply(orgIm, cellMask, thresholdIm);
+            new FileSaver(finalResult).saveAsJpeg(outputImageDir + File.separator + originalImageList[i]);
+            System.gc();
+
         }
     }
 }
