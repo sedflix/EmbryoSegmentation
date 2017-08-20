@@ -14,13 +14,29 @@ import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Level Set Stage.
+ * This stage is for changing/modifying the contours/rois found in the previous stage so that now they represent the actual cell membrane.
+ * The parameters use for modifying rois(can be called as curve evolution) are present in LevelSetParameters
+ * This stage requires the following to do its work
+ * - Original Image
+ * - Binary image that marks the interior region of each cell in the embryo
+ * - A binary image that represent boundry of the embryo
+ *
+ * @See LevelSetUtility, LevelSetParameters
+ */
 public class LevelSetStage {
     private String orginalImageDir;
     private String thresholdImageDir;
     private String cellMaskDir;
     private String outputImageDir;
 
-
+    /**
+     * @param originalImage
+     * @param thresholdImage
+     * @param cellMask
+     * @return
+     */
     public static RoiManager getEvolvedROIs(ImagePlus originalImage, ImagePlus thresholdImage, ImagePlus cellMask) {
 
 
@@ -123,11 +139,17 @@ public class LevelSetStage {
                 if (roi1ImagePlus.getRoi() != null) {
                     //if overlapping region exists
 
-                    ImageStatistics overlappingRegion = roi1ImagePlus.getRoi().getStatistics();
-                    ImageStatistics region1 = rm.getRoi(i).getStatistics();
-                    ImageStatistics region2 = rm.getRoi(j).getStatistics();
+                    //ADD operation to get the overlapping portion of roi[i] and roi[j]
+                    rm.runCommand(roi1ImagePlus, "ADD");
+
+                    //Bad Code to get what I want.
+                    //Get area of the intersectiong region
+                    ImageStatistics overlappingRegion = rm.getRoi(rm.getCount() - 1).getStatistics();
+                    tobeRemoved.add(rm.getCount() - 1);
 
                     //finds the ratio between the area of overlapping portion  of that roi and area of that roi
+                    ImageStatistics region1 = rm.getRoi(i).getStatistics();
+                    ImageStatistics region2 = rm.getRoi(j).getStatistics();
                     double area1 = overlappingRegion.area / region1.area;
                     double area2 = overlappingRegion.area / region2.area;
 
