@@ -4,8 +4,8 @@ import ij.gui.Roi;
 import java.awt.*;
 
 /**
- * Basic function of this is to provide a better method to manipulate the parameters in LevelSet Algorithms.
- * Details of the parameters can be found in LevelSet PlugIn offered in Fiji distribution of ImageJ. Link is provided here: https://imagej.net/Level_Sets
+ * Basic function of <code>LevelSetParameters</code> is to provide a better method to manipulate the parameters in LevelSet Algorithms.
+ * Details of the parameters can be found in <code>LevelSet</code> PlugIn offered in Fiji distribution of ImageJ. Link is provided here: <a href="https://imagej.net/Level_Sets">https://imagej.net/Level_Sets</a>
  */
 public class LevelSetParameters {
 

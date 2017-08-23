@@ -11,21 +11,41 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 
+/**
+ * <code>EmbryoBoundryDetection</code> is used to find the outer boundry of the embryo in an image.
+ */
 public class EmbryoBoundryDetection {
     private String inputDir;
     private String outputDir;
     private static final String title = "Boundry Detection";
 
+    /**
+     * Constructor.
+     *
+     * @param inputDir  address of the input folder. It will read all the files in the folder specified by inputDir
+     * @param outputDir address of the output folder. The result of this class are written into this folder
+     */
     public EmbryoBoundryDetection(String inputDir, String outputDir) {
         this.inputDir = inputDir;
         this.outputDir = outputDir;
     }
 
+    /**
+     * Default Constructor.
+     * This will create a pop up that will take <code>inputDir</code> and <code>outputDir</code> as an input
+     * @see EmbryoBoundryDetection(String , String)
+     */
     public EmbryoBoundryDetection() {
         GenericDialog gd = new GenericDialog(title);
         makeInputForm(gd);
     }
 
+    /**
+     * It returns a binary image where black represents interior region of the embryo and white represent region that is exterior to the embryo
+     *
+     * @param imagePlus Original Image(the microscopy image)
+     * @return An ImagePlus object of the result.
+     */
     public static ImagePlus apply(ImagePlus imagePlus) {
         if (imagePlus == null) {
             IJ.error("Unable to read image");
@@ -34,6 +54,9 @@ public class EmbryoBoundryDetection {
         return getWholeCellMask(imagePlus, true);
     }
 
+    /**
+     * Loops over all the images in the <code>inputDir</code> and calls the function <code>apply(ImagePlus)</code> on each image and saves the output in <code>outputDir</code>
+     */
     public void apply() {
         File inputImagesFolder = new File(inputDir);
         for (File inputImage : inputImagesFolder.listFiles()) {
@@ -67,6 +90,9 @@ public class EmbryoBoundryDetection {
         embryoBoundryDetection.apply();
     }
 
+    /*
+     Helps in making the GUI
+     */
     private Panel getChooser(String label, int factor) {
 
         Panel panel = new Panel(new FlowLayout());
@@ -80,11 +106,13 @@ public class EmbryoBoundryDetection {
             public void actionPerformed(ActionEvent actionEvent) {
                 switch (factor) {
                     case 1:
+                        //for inputDir input
                         DirectoryChooser directoryChooser = new DirectoryChooser(label);
                         jTextField.setText(directoryChooser.getDirectory());
                         inputDir = directoryChooser.getDirectory();
                         break;
                     case 2:
+                        //for outputDir input
                         DirectoryChooser directoryChooser2 = new DirectoryChooser(label);
                         jTextField.setText(directoryChooser2.getDirectory());
                         outputDir = directoryChooser2.getDirectory();
@@ -98,6 +126,9 @@ public class EmbryoBoundryDetection {
         return panel;
     }
 
+    /*
+    Helps in making the GUI for taking inout
+     */
     private void makeInputForm(GenericDialog genericDialog) {
         genericDialog.addPanel(getChooser("Input Image Folder", 1));
         genericDialog.addPanel(getChooser("Output Folder", 2));
