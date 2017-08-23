@@ -2,6 +2,7 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.NewImage;
 import ij.gui.Roi;
+import ij.io.DirectoryChooser;
 import ij.io.FileSaver;
 import ij.measure.Measurements;
 import ij.measure.ResultsTable;
@@ -10,6 +11,10 @@ import ij.plugin.filter.ParticleAnalyzer;
 import ij.plugin.frame.RoiManager;
 import ij.process.ImageStatistics;
 
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -19,20 +24,45 @@ import java.util.Set;
  * Level Set Stage.
  * This stage is for changing/modifying the contours/rois found in the previous stage so that now they represent the actual cell membrane.
  * The parameters use for modifying rois(can be called as curve evolution) are present in LevelSetParameters
- * This stage requires the following to do its work
- * - Original Image
- * - Binary image that marks the interior region of each cell in the embryo
- * - A binary image that represent boundry of the embryo
+ * This stage requires the following to do its work:
+ * <ul>
+ * <li>Original Image</li>
+ * <li>Binary image that marks the interior region of each cell in the embryo</li>
+ * <li>A binary image that represent boundry of the embryo</li>
+ * </ul>
  *
- * @See LevelSetUtility, LevelSetParameters
+ * @see  LevelSetUtility
+ * @see LevelSetParameters
  */
 public class LevelSetStage {
+
+    /**
+     * contains the original image directory address: Microscopy image
+     */
     private String orginalImageDir;
+
+    /**
+     * contains threshold(binary) image folder address
+     * black represents  interior region of a cell, while white represent any other region plus cell boundry
+     */
     private String thresholdImageDir;
+
+    /**
+     * /contains binary cellMask image directory address
+     * black pixels represents cells that belong to embryo and vice-versa
+     */
     private String cellMaskDir;
+
+
     private String outputImageDir;
 
 
+    /**
+     * @param orginalImageDir
+     * @param thresholdImageDir
+     * @param cellMaskDir
+     * @param outputImageDir
+     */
     public LevelSetStage(String orginalImageDir, String thresholdImageDir, String cellMaskDir, String outputImageDir) {
         this.orginalImageDir = orginalImageDir;
         this.thresholdImageDir = thresholdImageDir;
@@ -91,6 +121,13 @@ public class LevelSetStage {
         return rm;
     }
 
+    /**
+     * Plots all rois in a ROI Manager on an image
+     * @param rm ROI Manager that contains all the rois that needs to be mentioned in the image
+     * @param width width of the resulting image
+     * @param height height of the resulting image
+     * @return An ImagePlus image with all the rois drwn
+     */
     private static ImagePlus roisToImage(RoiManager rm, int width, int height) {
         ImagePlus finalImage = NewImage.createImage("Image with all ROIs in it", width, height, 1, 8, NewImage.FILL_BLACK);
 
@@ -100,6 +137,10 @@ public class LevelSetStage {
         return finalImage;
     }
 
+    /**
+     * just another helper function
+     * @return a ParticleAnalyser object that can be used in <code>getEvolvedROIs()</code>
+     */
     private static ParticleAnalyzer getParticleAnalyzer() {
         //Parameters for ParticleAnalyzer TODO: Research about them
         int opts = ParticleAnalyzer.ADD_TO_MANAGER;
@@ -110,6 +151,12 @@ public class LevelSetStage {
         return new ParticleAnalyzer(opts, meas, new ResultsTable(), minSize, maxSize);
     }
 
+    /**
+     * Combines the cell mask and threshold image to correct a some errors in the classified image
+     * @param imagePlus threshold binary image of the classified image [black -> interior region of a cell]
+     * @param restrictions cellMask [black -> inside embryo]
+     * @return
+     */
     private static ImagePlus refineMask(ImagePlus imagePlus, ImagePlus restrictions) {
         IJ.run(restrictions, "Dilate", "");
         IJ.run(restrictions, "Dilate", "");
@@ -192,6 +239,13 @@ public class LevelSetStage {
     }
 
 
+    /**
+     *
+     * @param originalImage
+     * @param thresholdImage
+     * @param cellMask
+     * @return
+     */
     public static ImagePlus apply(ImagePlus originalImage, ImagePlus thresholdImage, ImagePlus cellMask) {
         IJ.run(thresholdImage, "Make Binary", "");
         IJ.run(cellMask, "Make Binary", "");
@@ -221,24 +275,82 @@ public class LevelSetStage {
 
     }
 
+    /**
+     *
+     * Assumptions:
+     * <ul>
+     *     <li>All the three folder have the same number of images</li>
+     *     <li>They have the same name and sorting them would result in corresponding images in same index</li>
+     * </ul>
+     */
     public void apply() {
+
         String[] originalImageList = new File(this.orginalImageDir).list();
         String[] cellMaskList = new File(this.cellMaskDir).list();
         String[] thresholdList = new File(this.thresholdImageDir).list();
+
         Arrays.sort(originalImageList);
         Arrays.sort(cellMaskList);
         Arrays.sort(thresholdList);
+
         for (int i = 0; i < originalImageList.length; i++) {
+
             System.out.println(originalImageList[i]);
             System.out.println(cellMaskList[i]);
             System.out.println(thresholdList[i]);
+
+
             ImagePlus orgIm = IJ.openImage(orginalImageDir + originalImageList[i]);
             ImagePlus cellMask = IJ.openImage(cellMaskDir + cellMaskList[i]);
             ImagePlus thresholdIm = IJ.openImage(thresholdImageDir + thresholdList[i]);
+
+
             ImagePlus finalResult = LevelSetStage.apply(orgIm, cellMask, thresholdIm);
             new FileSaver(finalResult).saveAsJpeg(outputImageDir + File.separator + originalImageList[i]);
             System.gc();
 
         }
+    }
+
+    /*
+    Helps in making input box
+     */
+    private Panel getChooser(String label, int factor) {
+        Panel panel = new Panel(new GridLayout(2, 1));
+        JButton jButton = new JButton(label);
+        JTextField jTextField = new JTextField();
+        jTextField.setEditable(false);
+        jButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                switch (factor) {
+                    case 1:
+                        DirectoryChooser directoryChooser = new DirectoryChooser(label);
+                        jTextField.setText(directoryChooser.getDirectory());
+                        orginalImageDir = directoryChooser.getDirectory();
+                        break;
+                    case 2:
+                        DirectoryChooser directoryChooser2 = new DirectoryChooser(label);
+                        jTextField.setText(directoryChooser2.getDirectory());
+                        thresholdImageDir = directoryChooser2.getDirectory();
+                        break;
+                    case 3:
+                        DirectoryChooser directoryChooser3 = new DirectoryChooser(label);
+                        jTextField.setText(directoryChooser3.getDirectory());
+                        cellMaskDir = directoryChooser3.getDirectory();
+                        break;
+                    case 4:
+                        DirectoryChooser directoryChooser4 = new DirectoryChooser(label);
+                        jTextField.setText(directoryChooser4.getDirectory());
+                        outputImageDir = directoryChooser4.getDirectory();
+                        break;
+
+                }
+
+            }
+        });
+        panel.add(jButton);
+        panel.add(jTextField);
+        return panel;
     }
 }
