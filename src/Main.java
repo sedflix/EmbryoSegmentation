@@ -1,6 +1,10 @@
 import java.io.File;
 import java.io.IOException;
 
+//TODO: make PlugIn for each stage
+//TODO: make documentation/tutorial
+//TODO: make GUI for each class
+//TODO: make main
 public class Main {
     public static void main(String[] args) throws IOException {
 
@@ -19,10 +23,12 @@ public class Main {
         WekaSegmentaionStage wekaSegmentaionStage = new WekaSegmentaionStage(originalImage, probDir.getCanonicalPath(), wekaModel);
         wekaSegmentaionStage.apply();
 
-        ThresholdingStage thresholdingStage = new ThresholdingStage(probDir.getAbsolutePath(), thresholdDir.getCanonicalPath(), 0, 0.6);
-        thresholdingStage.apply();
+        //ThresholdingStage thresholdingStage = new ThresholdingStage(probDir.getAbsolutePath(), thresholdDir.getCanonicalPath(), 0, 0.6);
+        //thresholdingStage.apply();
 
         EmbryoBoundryDetection embryoBoundryDetection = new EmbryoBoundryDetection(originalImage, boundryDir.getCanonicalPath());
         embryoBoundryDetection.apply();
+
     }
+
 }

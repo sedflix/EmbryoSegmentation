@@ -44,7 +44,7 @@ public class LevelSetStage {
      * @param originalImage
      * @param thresholdImage
      * @param cellMask
-     * @return
+     * @return RoiManager that contains evolvedROI
      */
     public static RoiManager getEvolvedROIs(ImagePlus originalImage, ImagePlus thresholdImage, ImagePlus cellMask) {
 

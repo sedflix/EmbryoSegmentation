@@ -14,7 +14,6 @@ import java.io.File;
 
 /**
  * WekaSegmentaionStage is kind of the most crucial in this PlugIn.
- * <p>
  * The model you are using must satisfy the following properties:
  * 1) Should be a binary classifier
  * 2) It should properly identify a major interior region of each cell
@@ -114,6 +113,38 @@ public class WekaSegmentaionStage {
         }
     }
 
+    public static ImagePlus applyClassifier(ImagePlus imagePlus, String wekaClassifier) {
+
+        //Weka Trainable Segmentation tool created
+        WekaSegmentation wekaSegmentation = new WekaSegmentation();
+
+        //Loading classifier using the address in "wekaClassifier"
+        wekaSegmentation.loadClassifier(wekaClassifier);
+
+        if (imagePlus == null) {
+            //if not able to read imagePlus
+            IJ.error("empty image");
+            return null;
+        }
+
+        // apply classifier and get results (0 indicates number of threads is auto-detected) and true for probability map
+        ImagePlus result = wekaSegmentation.applyClassifier(imagePlus, 0, true);
+
+        //for clearing memory
+        System.gc();
+
+        return result;
+    }
+
+    public static ImagePlus applyClassifier(String imagepath, String wekaClassifier) {
+        return applyClassifier(new ImagePlus(imagepath), wekaClassifier);
+    }
+
+    /**
+     * Applies weka
+     *
+     * @param imageFile
+     */
     private void applyClassifier(File imageFile) {
         ImagePlus imagePlus = new ImagePlus(imageFile.getAbsolutePath());
         if (imagePlus != null) {
@@ -131,22 +162,6 @@ public class WekaSegmentaionStage {
         } else {
             IJ.error("Not able to read image");
         }
-    }
-
-    public static ImagePlus applyClassifier(String imagepath, String wekaClassifier) {
-        return applyClassifier(new ImagePlus(imagepath), wekaClassifier);
-    }
-
-    public static ImagePlus applyClassifier(ImagePlus imagePlus, String wekaClassifier) {
-        WekaSegmentation wekaSegmentation = new WekaSegmentation();
-        wekaSegmentation.loadClassifier(wekaClassifier);
-        if (imagePlus == null) {
-            IJ.error("empty image");
-            return null;
-        }
-        ImagePlus result = wekaSegmentation.applyClassifier(imagePlus, 0, true);
-        System.gc();
-        return result;
     }
 
     public String getOutpurImageFolder() {
