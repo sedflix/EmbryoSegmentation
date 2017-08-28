@@ -94,6 +94,7 @@ public class WekaSegmentaionStage {
         return result;
     }
 
+
     public void apply() {
         File inputImagesFolder = new File(inputImageFolder);
         for (File inputImage : inputImagesFolder.listFiles()) {

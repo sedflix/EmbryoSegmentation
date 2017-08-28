@@ -1,5 +1,6 @@
 import ij.IJ;
 import ij.ImagePlus;
+import ij.gui.GenericDialog;
 import ij.gui.NewImage;
 import ij.gui.Roi;
 import ij.io.DirectoryChooser;
@@ -56,6 +57,8 @@ public class LevelSetStage {
 
     private String outputImageDir;
 
+    private final String title = "Level Set Algo Stage";
+
 
     /**
      * @param orginalImageDir
@@ -70,6 +73,11 @@ public class LevelSetStage {
         this.outputImageDir = outputImageDir;
     }
 
+    public LevelSetStage() {
+        GenericDialog gd = new GenericDialog(title);
+        makeInputForm(gd);
+
+    }
     /**
      * @param originalImage
      * @param thresholdImage
@@ -261,11 +269,13 @@ public class LevelSetStage {
 //        ImagePlus add2 = IJ.openImage("/home/sid/Study/GSOC/GSoc/src/data/Data Annotation/YetAnotherThreshold/c369.tif");
 //        ImagePlus add3 = IJ.openImage("/home/sid/Study/GSOC/GSoc/src/data/Data Annotation/YetAnotherCellMask/c369.jpg");
 
-        LevelSetStage levelSetStage = new LevelSetStage(
-                "/home/sid/Study/GSOC/GSoc/src/data/Data Annotation/Orignal/",
-                "/home/sid/Study/GSOC/GSoc/src/data/Data Annotation/YetAnotherThreshold/",
-                "/home/sid/Study/GSOC/GSoc/src/data/Data Annotation/YetAnotherCellMask/",
-                "/home/sid/Study/GSOC/GSoc/src/data/Data Annotation/YetAnotherFinal/");
+//        LevelSetStage levelSetStage = new LevelSetStage(
+//                "/home/sid/Study/GSOC/GSoc/src/data/Data Annotation/Orignal/",
+//                "/home/sid/Study/GSOC/GSoc/src/data/Data Annotation/YetAnotherThreshold/",
+//                "/home/sid/Study/GSOC/GSoc/src/data/Data Annotation/YetAnotherCellMask/",
+//                "/home/sid/Study/GSOC/GSoc/src/data/Data Annotation/YetAnotherFinal/");
+
+        LevelSetStage levelSetStage = new LevelSetStage();
 
         levelSetStage.apply();
 
@@ -309,6 +319,22 @@ public class LevelSetStage {
             new FileSaver(finalResult).saveAsJpeg(outputImageDir + File.separator + originalImageList[i]);
             System.gc();
 
+        }
+    }
+
+
+    /*
+Helps to make GUI form
+ */
+    private void makeInputForm(GenericDialog genericDialog) {
+        genericDialog.addPanel(getChooser("Original Image Folder", 1));
+        genericDialog.addPanel(getChooser("Threshold Image Folder", 2));
+        genericDialog.addPanel(getChooser("Cell Mask Folder", 3));
+        genericDialog.addPanel(getChooser("Output Folder", 4));
+        genericDialog.pack();
+        genericDialog.showDialog();
+        if (genericDialog.wasCanceled()) {
+            IJ.error("PlugIn canceled!");
         }
     }
 
