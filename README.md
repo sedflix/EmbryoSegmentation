@@ -9,6 +9,8 @@ Organisation: [DevoWorm][4], [OpenWorm][5], [INCF][3]
 
 Documentation can be found at: [https://sedflix.github.io/EmbryoSegmentation/](https://sedflix.github.io/EmbryoSegmentation/)
 
+If you want to know more about the source code, please contact @ siddharth16268@iiitd.ac.in 
+
 
 [0]: https://www.linkedin.com/in/sedflix/
 [1]: https://www.linkedin.com/in/bradlyalicea
