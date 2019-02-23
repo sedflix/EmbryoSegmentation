@@ -7,7 +7,7 @@ Mentor: [Bradly Alicea][1]
 
 Organisation: [DevoWorm][4], [OpenWorm][5], [INCF][3] 
 
-Documentation can be found at: [https://geeksiddharth.github.io/EmbryoSegmentation/](https://seflix.github.io/EmbryoSegmentation/)
+Documentation can be found at: [https://sedflix.github.io/EmbryoSegmentation/](https://sedflix.github.io/EmbryoSegmentation/)
 
 
 [0]: https://www.linkedin.com/in/sedflix/
